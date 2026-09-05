@@ -1,0 +1,869 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Электронная рабочая тетрадь МЧС России</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --navy: #102a43;
+      --blue: #1677c8;
+      --light: #f3f7fb;
+      --white: #ffffff;
+      --text: #172b4d;
+      --muted: #627d98;
+      --green: #16855b;
+      --yellow: #d89b00;
+      --red: #c0392b;
+      --border: #d9e2ec;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background: linear-gradient(135deg, #edf5fb, #fff);
+      font-family: Georgia, "Times New Roman", serif;
+    }
+
+    header {
+      padding: 24px;
+      color: white;
+      background: linear-gradient(120deg, #102a43, #1677c8);
+      box-shadow: 0 3px 14px #102a4333;
+    }
+
+    header h1 {
+      max-width: 1400px;
+      margin: 0 auto 8px;
+      font-size: clamp(1.4rem, 3vw, 2.4rem);
+    }
+
+    header p {
+      max-width: 1400px;
+      margin: auto;
+      opacity: .86;
+    }
+
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px max(16px, calc((100% - 1400px) / 2));
+      background: #fff;
+      border-bottom: 1px solid var(--border);
+    }
+
+    button, input, select, textarea {
+      font: inherit;
+    }
+
+    button {
+      cursor: pointer;
+      border: 0;
+      border-radius: 7px;
+      padding: 10px 14px;
+      color: white;
+      background: var(--blue);
+    }
+
+    button.secondary { background: var(--navy); }
+    button.danger { background: var(--red); }
+    button.light { color: var(--navy); background: #e5eef7; }
+
+    nav button {
+      flex: 1 1 150px;
+      min-width: 130px;
+    }
+
+    main {
+      max-width: 1400px;
+      margin: auto;
+      padding: 22px 16px 50px;
+    }
+
+    .module { display: none; }
+    .module.active { display: block; animation: appear .25s ease; }
+
+    @keyframes appear {
+      from { opacity: 0; transform: translateY(7px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      margin-bottom: 16px;
+      padding: 18px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      box-shadow: 0 5px 18px #102a4310;
+    }
+
+    h2, h3 { margin-top: 0; }
+    h2 { color: var(--navy); }
+    h3 { color: var(--blue); }
+
+    label {
+      display: block;
+      margin: 8px 0;
+      color: var(--muted);
+      font-size: .95rem;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      margin-top: 4px;
+      padding: 9px;
+      color: var(--text);
+      background: white;
+      border: 1px solid #bcccdc;
+      border-radius: 6px;
+    }
+
+    textarea { min-height: 100px; resize: vertical; }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .metric {
+      padding: 14px;
+      border-left: 4px solid var(--blue);
+      background: #edf6fd;
+      border-radius: 6px;
+    }
+
+    .metric strong {
+      display: block;
+      margin-top: 4px;
+      color: var(--navy);
+      font-size: 1.35rem;
+    }
+
+    .theory-item {
+      margin: 8px 0;
+      padding: 12px;
+      background: #f7fafc;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+    }
+
+    .theory-item summary {
+      cursor: pointer;
+      font-weight: bold;
+      color: var(--navy);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .92rem;
+    }
+
+    th, td {
+      padding: 9px;
+      text-align: left;
+      vertical-align: top;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      color: white;
+      background: var(--navy);
+    }
+
+    tr:nth-child(even) { background: #f7fafc; }
+
+    .table-wrap { overflow-x: auto; }
+
+    .badge {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      color: white;
+      font-size: .83rem;
+      font-weight: bold;
+    }
+
+    .excellent, .good { background: var(--green); }
+    .satisfactory { background: var(--yellow); }
+    .fail, .attention { background: var(--red); }
+
+    .admin-box {
+      border: 2px dashed var(--blue);
+      background: #f2f9ff;
+    }
+
+    .question {
+      margin: 12px 0;
+      padding: 14px;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+
+    canvas {
+      max-height: 330px;
+      margin-top: 10px;
+    }
+
+    .muted { color: var(--muted); }
+    .hidden { display: none; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+    @media (max-width: 700px) {
+      header, main { padding-left: 12px; padding-right: 12px; }
+      th, td { min-width: 120px; }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Электронная рабочая тетрадь обучающегося образовательной организации высшего образования МЧС России по дисциплине «Физическая подготовка»</h1>
+  <p>Офлайн-прототип для курсантов 1–5 курсов и преподавателей</p>
+</header>
+
+<nav>
+  <button data-module="profile">Профиль</button>
+  <button data-module="theory">Теоретическая подготовка</button>
+  <button data-module="practice">Практическая подготовка</button>
+  <button data-module="diary">Дневник и графики</button>
+  <button data-module="standards">Справочник нормативов</button>
+  <button data-module="results">Сдача нормативов</button>
+  <button data-module="tests">Тестирование</button>
+  <button data-module="analytics">Аналитика преподавателя</button>
+  <button data-module="history">История результатов</button>
+</nav>
+
+<main>
+  <section id="profile" class="module active">
+    <h2>Профиль курсанта</h2>
+    <div class="card">
+      <div class="grid">
+        <label>ФИО<input id="fullName" placeholder="Иванов Иван Иванович"></label>
+        <label>Курс<select id="course"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label>
+        <label>Взвод<input id="platoon" placeholder="ФП-101"></label>
+        <label>Возраст<input id="age" type="number" min="16" max="80"></label>
+        <label>Рост, см<input id="height" type="number" min="100"></label>
+        <label>Масса, кг<input id="weight" type="number" min="30" step=".1"></label>
+        <label>Пульс покоя, уд/мин<input id="restPulse" type="number" min="30" max="150" value="70"></label>
+        <label>Максимальный пульс<input id="maxPulse" type="number" min="100" max="240" placeholder="210 - возраст"></label>
+      </div>
+      <div class="actions">
+        <button id="saveProfile">Сохранить профиль</button>
+      </div>
+      <div id="profileMetrics" class="metrics"></div>
+    </div>
+  </section>
+
+  <section id="theory" class="module">
+    <h2>Теоретическая подготовка</h2>
+    <div id="theoryContent"></div>
+    <div class="card admin-box">
+      <h3>Администратор: добавить материал</h3>
+      <label>Название материала<input id="materialTitle"></label>
+      <label>Раздел<select id="materialSection">
+        <option>Теоретическая подготовка</option>
+        <option>Охрана труда</option>
+        <option>Первая помощь</option>
+      </select></label>
+      <label>Текст материала<textarea id="materialText"></textarea></label>
+      <div class="actions"><button id="addMaterial">Добавить материал</button><button class="light" id="exportData">Экспорт данных</button><label><input id="importData" type="file" accept=".json"> Импорт данных</label></div>
+    </div>
+  </section>
+
+  <section id="practice" class="module">
+    <h2>Практическая подготовка</h2>
+    <div id="practiceContent" class="grid"></div>
+    <div class="card admin-box">
+      <h3>Администратор: добавить комплекс</h3>
+      <label>Курс<input id="practiceCourse" type="number" min="1" max="5"></label>
+      <label>Неделя семестра<input id="practiceWeek" type="number" min="1" max="18"></label>
+      <label>Название комплекса<input id="practiceTitle"></label>
+      <label>Упражнения, дозировка и методические указания<textarea id="practiceText"></textarea></label>
+      <div class="actions"><button id="addPractice">Добавить комплекс</button><label><input id="practiceFile" type="file" accept=".json,.txt"> Загрузить файл</label></div>
+    </div>
+  </section>
+
+  <section id="diary" class="module">
+    <h2>Дневник самоконтроля</h2>
+    <div class="card">
+      <div class="grid">
+        <label>Дата<input id="diaryDate" type="date"></label>
+        <label>ЧСС утром<input id="morningPulse" type="number"></label>
+        <label>ЧСС вечером<input id="eveningPulse" type="number"></label>
+        <label>Масса тела<input id="diaryWeight" type="number" step=".1"></label>
+        <label>Самочувствие, 1–5<input id="wellbeing" type="number" min="1" max="5"></label>
+        <label>Сон, 1–5<input id="sleep" type="number" min="1" max="5"></label>
+        <label>Аппетит, 1–5<input id="appetite" type="number" min="1" max="5"></label>
+        <label>Желание тренироваться, 1–5<input id="motivation" type="number" min="1" max="5"></label>
+        <label>Результаты тренировки<textarea id="trainingResult"></textarea></label>
+      </div>
+      <div class="actions"><button id="saveDiary">Сохранить запись</button></div>
+      <div id="orthoResult" class="metrics"></div>
+    </div>
+    <div class="grid">
+      <div class="card"><h3>ЧСС</h3><canvas id="pulseChart"></canvas></div>
+      <div class="card"><h3>Ортостатическая проба</h3><canvas id="orthoChart"></canvas></div>
+      <div class="card"><h3>Масса тела</h3><canvas id="weightChart"></canvas></div>
+      <div class="card"><h3>Субъективные показатели</h3><canvas id="subjectiveChart"></canvas></div>
+    </div>
+  </section>
+
+  <section id="standards" class="module">
+    <h2>Справочник нормативов</h2>
+    <div class="card">
+      <label>Фильтр по упражнению<input id="standardSearch" placeholder="Введите название"></label>
+      <div class="table-wrap"><table><thead><tr><th>Упражнение</th><th>Форма</th><th>Юноши: отлично / хорошо / удовлетворительно</th><th>Девушки: отлично / хорошо / удовлетворительно</th><th>Тип</th></tr></thead><tbody id="standardsTable"></tbody></table></div>
+    </div>
+  </section>
+
+  <section id="results" class="module">
+    <h2>Сдача нормативов</h2>
+    <div class="card">
+      <div class="grid">
+        <label>Упражнение<select id="resultExercise"></select></label>
+        <label>Пол<select id="resultGender"><option value="male">Юноши</option><option value="female">Девушки</option></select></label>
+        <label>Результат<input id="resultValue" placeholder="Например: 12.8"></label>
+      </div>
+      <div class="actions"><button id="evaluateResult">Оценить результат</button></div>
+      <div id="evaluation"></div>
+    </div>
+    <div class="card admin-box">
+      <h3>Администратор: добавить норматив</h3>
+      <div class="grid">
+        <label>Название<input id="newStandardName"></label>
+        <label>Форма<input id="newStandardForm" value="1"></label>
+        <label>Тип<select id="newStandardType"><option value="lower">Меньше лучше</option><option value="higher">Больше лучше</option></select></label>
+        <label>Юноши, отлично/хорошо/удовлетворительно<input id="newMale" placeholder="10/12/14"></label>
+        <label>Девушки, отлично/хорошо/удовлетворительно<input id="newFemale" placeholder="10/12/14"></label>
+      </div>
+      <div class="actions"><button id="addStandard">Добавить норматив</button><label><input id="standardsFile" type="file" accept=".json"> Загрузить JSON</label></div>
+    </div>
+  </section>
+
+  <section id="tests" class="module">
+    <h2>Тестирование</h2>
+    <div class="card">
+      <div id="quiz"></div>
+      <button id="checkQuiz">Проверить тест</button>
+      <div id="quizResult"></div>
+    </div>
+    <div class="card admin-box">
+      <h3>Администратор: создать вопрос</h3>
+      <label>Вопрос<input id="questionText"></label>
+      <label>Варианты ответа через `;`<input id="questionOptions" placeholder="Вариант 1; Вариант 2; Вариант 3"></label>
+      <label>Номер правильного варианта<input id="questionCorrect" type="number" min="0"></label>
+      <div class="actions"><button id="addQuestion">Добавить вопрос</button><label><input id="questionsFile" type="file" accept=".json"> Загрузить JSON</label></div>
+    </div>
+  </section>
+
+  <section id="analytics" class="module">
+    <h2>Аналитика преподавателя</h2>
+    <div class="card">
+      <div class="grid">
+        <label>Курс<input id="analyticsCourse" type="number" min="1" max="5"></label>
+        <label>Взвод<input id="analyticsPlatoon"></label>
+      </div>
+      <div class="actions"><button id="buildAnalytics">Сформировать сводку</button></div>
+      <div id="analyticsResult"></div>
+    </div>
+  </section>
+
+  <section id="history" class="module">
+    <h2>История результатов</h2>
+    <div class="card">
+      <div class="table-wrap"><table><thead><tr><th>Дата</th><th>Упражнение</th><th>Пол</th><th>Результат</th><th>Оценка</th></tr></thead><tbody id="historyTable"></tbody></table></div>
+      <canvas id="historyChart"></canvas>
+    </div>
+  </section>
+</main>
+
+<script>
+  const STORAGE_KEY = "ertMchsData";
+
+  const defaultStandards = [
+    { name: "Бег 30 м", form: "1", type: "lower", male: [4.3, 4.6, 4.8], female: [5.1, 5.7, 5.9] },
+    { name: "Бег 60 м", form: "1", type: "lower", male: [7.9, 8.4, 9.0], female: [9.5, 10.3, 11.1] },
+    { name: "Бег 100 м", form: "1", type: "lower", male: [13.2, 14.1, 14.8], female: [16.2, 17.1, 18.1] },
+    { name: "Челночный бег 10х10 м", form: "1", type: "lower", male: [24, 25, 26], female: [32, 34, 36] },
+    { name: "Бег 1000 м", form: "1", type: "lower", male: [190, 205, 220], female: [240, 255, 275] },
+    { name: "Кросс 2 км / 3 км", form: "1", type: "lower", male: [740, 850, 920], female: [585, 670, 745] },
+    { name: "Кросс 5 км", form: "1", type: "lower", male: [1320, 1380, 1440], female: null },
+    { name: "Марш-бросок 6 км", form: "4", type: "lower", male: [1980, 2040, 2100], female: [2100, 2160, 2220] },
+    { name: "Прыжок в длину с места", form: "1", type: "higher", male: [235, 213, 192], female: [198, 183, 167] },
+    { name: "Подтягивание на высокой перекладине", form: "1", type: "higher", male: [15, 12, 8], female: null },
+    { name: "Подтягивание на низкой перекладине", form: "1", type: "higher", male: null, female: [20, 14, 10] },
+    { name: "Сгибание и разгибание рук", form: "1", type: "higher", male: [43, 32, 25], female: [20, 14, 10] },
+    { name: "Силовое комплексное упражнение", form: "1", type: "higher", male: [5, 4, 3], female: [34, 30, 26] },
+    { name: "Силовое упражнение на перекладине", form: "1", type: "higher", male: [3, 2, 1], female: [4, 3, 2] },
+    { name: "Подъем переворотом", form: "3 (1)", type: "higher", male: [6, 4, 2], female: [8, 6, 4] },
+    { name: "Рывок гири 16 кг", form: "1", type: "higher", male: [34, 19, 14], female: [35, 19, 14] },
+    { name: "Наклон туловища вперед", form: "1", type: "higher", male: [60, 55, 50], female: [50, 45, 40] },
+    { name: "Лыжные гонки 5 км", form: "4", type: "lower", male: [1420, 1545, 1675], female: [1410, 1540, 1680] },
+    { name: "Лыжные гонки 3 км", form: "4", type: "lower", male: null, female: [1000, 1115, 1230] },
+    { name: "Подъем по ЛШ на 2-й этаж", form: "1", type: "lower", male: [10, 12, 14], female: [10, 12, 14] },
+    { name: "Подъем по ЛШ на 3-й этаж", form: "1", type: "lower", male: [18, 21, 24], female: null },
+    { name: "Подъем по ЛШ на 4-й этаж", form: "1", type: "lower", male: [24, 26, 28], female: null },
+    { name: "Приемы самообороны по ВФСК ГТО", form: "1", type: "higher", male: [1, 1, 1], female: [1, 1, 1] }
+  ];
+
+  const defaultTheory = [
+    ["Физическая культура и профессиональная подготовка", [
+      "Определение понятия физическая культура и ее функции: совокупность ценностей, знаний и практической деятельности, направленных на развитие человека и укрепление здоровья.",
+      "Физическая культура как научная дисциплина: изучает закономерности двигательной активности, адаптации организма и методики физического воспитания.",
+      "Основные понятия системы физической культуры: физическое развитие, физическая подготовленность, физическое воспитание, спорт, двигательная активность.",
+      "Физическая культура как учебная дисциплина в системе МЧС России: формирует готовность к действиям в условиях повышенной нагрузки и риска.",
+      "Цель, задачи и средства дисциплины: развитие физических качеств, обучение прикладным навыкам, профилактика травм и укрепление здоровья.",
+      "Ценностные ориентации курсантов: ответственность, дисциплина, самоконтроль, командность и готовность к профессиональным действиям.",
+      "Функции в системе МЧС России: оздоровительная, прикладная, воспитательная, рекреативная, контрольная и интегративная."
+    ]],
+    ["Самостоятельные занятия физическими упражнениями", [
+      "Сущность самостоятельных занятий: планируемая курсантом двигательная деятельность с учетом целей, состояния здоровья и требований подготовки.",
+      "Основные понятия: нагрузка, интенсивность, объем, восстановление, адаптация, тренировочный эффект.",
+      "Мотивация и целенаправленность: связь занятия с профессиональными задачами, личными результатами и безопасностью.",
+      "Формы и средства: утренняя гимнастика, бег, круговая тренировка, спортивные игры, плавание и силовые упражнения.",
+      "Выбор систем: необходимо учитывать возраст, уровень подготовленности, медицинские ограничения и доступное оборудование.",
+      "Планирование: чередование нагрузки и восстановления, постепенное увеличение объема, контрольные точки.",
+      "Сенситивные периоды: развитие качеств должно соответствовать возрасту и индивидуальной готовности организма.",
+      "Управление занятиями: постановка цели, выполнение, контроль, анализ и корректировка плана.",
+      "Границы интенсивности: ориентиром служат пульсовые зоны, субъективная оценка нагрузки и отсутствие опасных симптомов.",
+      "Самоконтроль: пульс, сон, аппетит, настроение, масса тела, работоспособность и восстановление.",
+      "Профилактика травматизма: разминка, техника, исправное оборудование, страховка, постепенность и соблюдение правил."
+    ]],
+    ["Основы физиологии тренировки", Array.from({ length: 10 }, (_, i) => `${i + 1}. Принципы адаптации организма к физической нагрузке, восстановление, суперкомпенсация и контроль функционального состояния.`)],
+    ["Основы здорового образа жизни", Array.from({ length: 10 }, (_, i) => `${i + 1}. Рациональный режим дня, сон, питание, двигательная активность, отказ от вредных привычек и профилактика заболеваний.`)],
+    ["Профессионально-прикладная физическая подготовка", Array.from({ length: 10 }, (_, i) => `${i + 1}. Развитие качеств и навыков, необходимых для действий при пожаре, аварии, спасательной операции и работе в экипировке.`)],
+    ["Охрана труда и первая помощь", [
+      "Легкая атлетика: проверка покрытия, обуви, дистанции, разминка и соблюдение интервалов.",
+      "Прикладная гимнастика: исправность снарядов, страховка, безопасная техника приземления.",
+      "Лыжная подготовка: проверка креплений, маршрута, погодных условий и дистанции.",
+      "Приемы самообороны: контроль силы, защитное снаряжение, команда остановки.",
+      "Спортивные игры: осмотр площадки, разминка, соблюдение правил контакта.",
+      "Подъем по ЛШ на 2-й этаж: проверка лестницы, страховки, каски и правильного хвата.",
+      "Подъем по ЛШ на 4-й этаж: работа звеньями, контроль страховочной системы и темпа.",
+      "Методика самоконтроля: прекращение занятия при боли, головокружении, одышке или ухудшении самочувствия.",
+      "Первая помощь при травмах: безопасность места, вызов 112, остановка кровотечения, иммобилизация, охлаждение ушиба.",
+      "При подозрении на тяжелую травму не перемещать пострадавшего без необходимости и передать его медицинским работникам."
+    ]]
+  ];
+
+  const defaultQuestions = [
+    ["Что такое физическая культура?", ["Система ценностей и деятельности для развития человека", "Только соревнования", "Только утренняя зарядка"], 0],
+    ["Что показывает ИМТ?", ["Соотношение массы и роста", "Максимальный пульс", "Скорость бега"], 0],
+    ["Для чего нужна разминка?", ["Для подготовки организма и профилактики травм", "Для снижения температуры", "Для замены тренировки"], 0],
+    ["Что относится к самоконтролю?", ["Пульс и самочувствие", "Только оценка преподавателя", "Только секундомер"], 0],
+    ["Что необходимо сделать при сильном кровотечении?", ["Остановить кровотечение и вызвать помощь", "Продолжить тренировку", "Дать пострадавшему нагрузку"], 0],
+    ["Как рассчитывается ΔЧСС в ортостатической пробе?", ["ЧСС стоя минус ЧСС лежа", "ЧСС лежа плюс ЧСС стоя", "Масса минус рост"], 0],
+    ["Что означает прогрессивность нагрузки?", ["Постепенное увеличение требований", "Максимальная нагрузка с первого занятия", "Отсутствие восстановления"], 0],
+    ["Что характеризует пульсовая зона?", ["Диапазон интенсивности по ЧСС", "Длину дистанции", "Температуру воздуха"], 0],
+    ["Что является признаком необходимости прекратить занятие?", ["Острая боль или головокружение", "Рабочее дыхание", "Умеренная усталость"], 0],
+    ["Для чего нужна страховка на снарядах?", ["Для снижения риска травмы", "Для увеличения веса", "Для учета времени"], 0],
+    ["Что такое суперкомпенсация?", ["Временное повышение возможностей после восстановления", "Снижение температуры", "Вид разминки"], 0],
+    ["Что следует учитывать при выборе самостоятельных занятий?", ["Здоровье, цели и уровень подготовленности", "Только мнение товарища", "Только продолжительность"], 0],
+    ["Что важнее при выполнении приема самообороны?", ["Контроль техники и безопасности партнера", "Максимальная скорость любой ценой", "Отсутствие команды"], 0],
+    ["Какой показатель относится к субъективным?", ["Самочувствие", "ЧСС", "Масса тела"], 0],
+    ["Зачем планировать восстановление?", ["Чтобы обеспечить адаптацию и снизить риск перегрузки", "Чтобы отменить все тренировки", "Чтобы не вести дневник"], 0],
+    ["Каков главный принцип первой помощи?", ["Сначала обеспечить безопасность места", "Сразу покинуть место", "Дать неизвестное лекарство"], 0],
+    ["Что означает индивидуализация тренировки?", ["Учет особенностей конкретного курсанта", "Одинаковая нагрузка для всех", "Отсутствие контроля"], 0],
+    ["Для чего ведется история нормативов?", ["Для анализа динамики результатов", "Только для печати", "Для замены медицинского осмотра"], 0],
+    ["Что делать при неисправности спортивного оборудования?", ["Прекратить использование и сообщить ответственному", "Использовать осторожнее", "Спрятать неисправность"], 0],
+    ["Какая цель физической подготовки в МЧС?", ["Готовность к безопасному выполнению профессиональных задач", "Только внешний вид", "Только участие в соревнованиях"], 0]
+  ];
+
+  let data = loadData();
+  let charts = {};
+
+  function loadData() {
+    const saved = localStorage.getItem(STORAGE_KEY);
+    const base = {
+      profile: {},
+      diary: [],
+      results: [],
+      standards: defaultStandards,
+      materials: [],
+      practices: [],
+      questions: defaultQuestions
+    };
+    if (!saved) return base;
+    try {
+      return { ...base, ...JSON.parse(saved) };
+    } catch {
+      return base;
+    }
+  }
+
+  function saveData() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
+
+  function value(id) {
+    return document.getElementById(id).value;
+  }
+
+  function numeric(id) {
+    return Number(value(id));
+  }
+
+  function formatSeconds(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const rest = Math.round(seconds % 60).toString().padStart(2, "0");
+    return minutes ? `${minutes}:${rest}` : String(seconds);
+  }
+
+  function ageGroup(age) {
+    if (!age) return "не определена";
+    if (age <= 17) return "VI ступень: 16–17 лет";
+    if (age <= 19) return "VII ступень: 18–19 лет";
+    if (age <= 24) return "VIII ступень: 20–24 года";
+    return "старше 24 лет";
+  }
+
+  function saveProfile() {
+    data.profile = {
+      fullName: value("fullName"),
+      course: numeric("course"),
+      platoon: value("platoon"),
+      age: numeric("age"),
+      height: numeric("height"),
+      weight: numeric("weight"),
+      restPulse: numeric("restPulse"),
+      maxPulse: numeric("maxPulse") || 210 - numeric("age")
+    };
+    saveData();
+    renderProfile();
+    alert("Профиль сохранен локально.");
+  }
+
+  function renderProfile() {
+    const p = data.profile;
+    ["fullName", "course", "platoon", "age", "height", "weight", "restPulse", "maxPulse"].forEach(id => {
+      if (p[id] !== undefined) document.getElementById(id).value = p[id];
+    });
+    const bmi = p.height && p.weight ? (p.weight / ((p.height / 100) ** 2)).toFixed(1) : "—";
+    const maxPulse = p.maxPulse || (p.age ? 210 - p.age : 0);
+    const zones = maxPulse && p.restPulse ? [0.5, 0.6, 0.7, 0.8, 0.9].map(x => Math.round(p.restPulse + (maxPulse - p.restPulse) * x)).join("–") : "—";
+    document.getElementById("profileMetrics").innerHTML = `
+      <div class="metric">ИМТ<strong>${bmi}</strong></div>
+      <div class="metric">Возрастная группа<strong>${ageGroup(p.age)}</strong></div>
+      <div class="metric">Пульсовые зоны Карвонена<strong>${zones}</strong></div>
+    `;
+  }
+
+  function renderTheory() {
+    const container = document.getElementById("theoryContent");
+    const groups = [...defaultTheory, ...data.materials.map(item => [item.title, [item.text]])];
+    container.innerHTML = groups.map(([title, items]) => `
+      <div class="card">
+        <h3>${title}</h3>
+        ${items.map((text, index) => `<details class="theory-item"><summary>${text.split(":")[0]}</summary><p>${text}</p></details>`).join("")}
+      </div>
+    `).join("");
+  }
+
+  function renderPractice() {
+    const generated = [];
+    for (let course = 1; course <= 5; course++) {
+      for (let week = 1; week <= 10; week++) {
+        generated.push({
+          course,
+          week,
+          title: `Комплекс ${week}. Курс ${course}`,
+          text: "Разминка 10 минут; бег 6–10 минут; подтягивания 3x5; отжимания 3x12; челночный бег 4x10 м; заминка 5 минут. Пауза 60–90 секунд. Контролировать технику и ЧСС."
+        });
+      }
+    }
+    const items = [...generated, ...data.practices];
+    document.getElementById("practiceContent").innerHTML = items.map(item => `
+      <article class="card">
+        <h3>${item.title}</h3>
+        <p><strong>Курс:</strong> ${item.course}; <strong>Неделя:</strong> ${item.week}</p>
+        <p>${item.text}</p>
+        <p class="muted">Схема: разминка → основная часть → интервалы восстановления → заминка.</p>
+      </article>
+    `).join("");
+  }
+
+  function renderStandards() {
+    const query = value("standardSearch").toLowerCase();
+    const rows = data.standards.filter(s => s.name.toLowerCase().includes(query)).map(s => `
+      <tr>
+        <td>${s.name}</td>
+        <td>${s.form}</td>
+        <td>${s.male ? s.male.join(" / ") : "—"}</td>
+        <td>${s.female ? s.female.join(" / ") : "—"}</td>
+        <td>${s.type === "lower" ? "меньше лучше" : "больше лучше"}</td>
+      </tr>
+    `).join("");
+    document.getElementById("standardsTable").innerHTML = rows;
+    document.getElementById("resultExercise").innerHTML = data.standards.map((s, i) => `<option value="${i}">${s.name}</option>`).join("");
+  }
+
+  function evaluateStandard(standard, gender, result) {
+    const limits = standard[gender];
+    if (!limits || Number.isNaN(result)) return { label: "Нет норматива", className: "fail" };
+    const [excellent, good, satisfactory] = limits;
+    if (standard.type === "lower") {
+      if (result <= excellent) return { label: "Отлично", className: "excellent" };
+      if (result <= good) return { label: "Хорошо", className: "good" };
+      if (result <= satisfactory) return { label: "Удовлетворительно", className: "satisfactory" };
+    } else {
+      if (result >= excellent) return { label: "Отлично", className: "excellent" };
+      if (result >= good) return { label: "Хорошо", className: "good" };
+      if (result >= satisfactory) return { label: "Удовлетворительно", className: "satisfactory" };
+    }
+    return { label: "Не выполнено", className: "fail" };
+  }
+
+  function evaluateResult() {
+    const standard = data.standards[numeric("resultExercise")];
+    const gender = value("resultGender");
+    const result = numeric("resultValue");
+    const grade = evaluateStandard(standard, gender, result);
+    document.getElementById("evaluation").innerHTML = `<p><span class="badge ${grade.className}">${grade.label}</span></p>`;
+    data.results.push({
+      date: new Date().toISOString().slice(0, 10),
+      exercise: standard.name,
+      gender,
+      result,
+      grade: grade.label
+    });
+    saveData();
+    renderHistory();
+  }
+
+  function saveDiary() {
+    const lying = numeric("morningPulse");
+    const standing = numeric("eveningPulse");
+    const delta = standing - lying;
+    const status = delta <= 12 ? "Норма" : delta <= 18 ? "Допустимо" : "Внимание";
+    data.diary.push({
+      date: value("diaryDate") || new Date().toISOString().slice(0, 10),
+      morning: lying,
+      evening: standing,
+      delta,
+      weight: numeric("diaryWeight"),
+      wellbeing: numeric("wellbeing"),
+      sleep: numeric("sleep"),
+      appetite: numeric("appetite"),
+      motivation: numeric("motivation"),
+      training: value("trainingResult")
+    });
+    saveData();
+    document.getElementById("orthoResult").innerHTML = `<div class="metric">ΔЧСС<strong>${delta} уд/мин</strong></div><div class="metric">Оценка<strong>${status}</strong></div>`;
+    renderCharts();
+  }
+
+  function chart(id, config) {
+    if (charts[id]) charts[id].destroy();
+    charts[id] = new Chart(document.getElementById(id), config);
+  }
+
+  function renderCharts() {
+    const labels = data.diary.map(x => x.date);
+    const line = (label, values, color) => ({
+      type: "line",
+      data: { labels, datasets: [{ label, data: values, borderColor: color, backgroundColor: `${color}33`, tension: .3, fill: true }] },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+    chart("pulseChart", line("Утро", data.diary.map(x => x.morning), "#1677c8"));
+    chart("orthoChart", line("ΔЧСС", data.diary.map(x => x.delta), "#c0392b"));
+    chart("weightChart", line("Масса", data.diary.map(x => x.weight), "#16855b"));
+    chart("subjectiveChart", {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          { label: "Самочувствие", data: data.diary.map(x => x.wellbeing), borderColor: "#1677c8" },
+          { label: "Сон", data: data.diary.map(x => x.sleep), borderColor: "#d89b00" },
+          { label: "Аппетит", data: data.diary.map(x => x.appetite), borderColor: "#16855b" },
+          { label: "Мотивация", data: data.diary.map(x => x.motivation), borderColor: "#c0392b" }
+        ]
+      },
+      options: { responsive: true, maintainAspectRatio: false, scales: { y: { min: 0, max: 5 } } }
+    });
+  }
+
+  function renderQuiz() {
+    document.getElementById("quiz").innerHTML = data.questions.map((q, i) => `
+      <div class="question">
+        <strong>${i + 1}. ${q[0]}</strong>
+        ${q[1].map((option, index) => `<label><input type="radio" name="q${i}" value="${index}"> ${option}</label>`).join("")}
+      </div>
+    `).join("");
+  }
+
+  function checkQuiz() {
+    let correct = 0;
+    data.questions.forEach((q, i) => {
+      const selected = document.querySelector(`input[name="q${i}"]:checked`);
+      if (selected && Number(selected.value) === q[2]) correct++;
+    });
+    const percent = Math.round(correct / data.questions.length * 100);
+    document.getElementById("quizResult").innerHTML = `<p><strong>Результат: ${correct} из ${data.questions.length} (${percent}%).</strong></p>`;
+  }
+
+  function renderHistory() {
+    document.getElementById("historyTable").innerHTML = data.results.map(r => `
+      <tr><td>${r.date}</td><td>${r.exercise}</td><td>${r.gender === "male" ? "Юноши" : "Девушки"}</td><td>${r.result}</td><td>${r.grade}</td></tr>
+    `).join("");
+    const grouped = {};
+    data.results.forEach(r => {
+      grouped[r.exercise] ||= [];
+      grouped[r.exercise].push(r.result);
+    });
+    if (charts.history) charts.history.destroy();
+    charts.history = new Chart(document.getElementById("historyChart"), {
+      type: "line",
+      data: { labels: data.results.map(r => r.date), datasets: Object.entries(grouped).map(([name, values], i) => ({ label: name, data: values, borderColor: `hsl(${i * 47}, 65%, 42%)`, tension: .3 })) },
+      options: { responsive: true }
+    });
+  }
+
+  function buildAnalytics() {
+    const course = numeric("analyticsCourse");
+    const platoon = value("analyticsPlatoon");
+    const p = data.profile;
+    const filtered = data.results.filter(r => (!course || Number(p.course) === course) && (!platoon || p.platoon === platoon));
+    const failed = filtered.filter(r => r.grade === "Не выполнено");
+    document.getElementById("analyticsResult").innerHTML = `
+      <div class="metrics">
+        <div class="metric">Результатов<strong>${filtered.length}</strong></div>
+        <div class="metric">Не выполнено<strong>${failed.length}</strong></div>
+        <div class="metric">Доля успешных<strong>${filtered.length ? Math.round((filtered.length - failed.length) / filtered.length * 100) : 0}%</strong></div>
+      </div>
+      <p class="muted">Отстающие определяются по результатам со статусом «Не выполнено». Для групповой сводки данные разных курсантов можно импортировать единым JSON-файлом.</p>
+    `;
+  }
+
+  function addMaterial() {
+    data.materials.push({ title: value("materialTitle"), text: value("materialText"), section: value("materialSection") });
+    saveData(); renderTheory();
+  }
+
+  function addPractice() {
+    data.practices.push({ course: numeric("practiceCourse"), week: numeric("practiceWeek"), title: value("practiceTitle"), text: value("practiceText") });
+    saveData(); renderPractice();
+  }
+
+  function addStandard() {
+    const parse = id => value(id).split("/").map(Number);
+    data.standards.push({
+      name: value("newStandardName"),
+      form: value("newStandardForm"),
+      type: value("newStandardType"),
+      male: parse("newMale"),
+      female: parse("newFemale")
+    });
+    saveData(); renderStandards();
+  }
+
+  function addQuestion() {
+    data.questions.push([value("questionText"), value("questionOptions").split(";").map(x => x.trim()), numeric("questionCorrect")]);
+    saveData(); renderQuiz();
+  }
+
+  function importJson(file, callback) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try { callback(JSON.parse(reader.result)); saveData(); } catch { alert("Файл должен содержать корректный JSON."); }
+    };
+    reader.readAsText(file);
+  }
+
+  document.querySelectorAll("nav button").forEach(button => {
+    button.addEventListener("click", () => {
+      document.querySelectorAll(".module").forEach(section => section.classList.remove("active"));
+      document.getElementById(button.dataset.module).classList.add("active");
+      if (button.dataset.module === "diary") renderCharts();
+      if (button.dataset.module === "history") renderHistory();
+    });
+  });
+
+  document.getElementById("saveProfile").addEventListener("click", saveProfile);
+  document.getElementById("addMaterial").addEventListener("click", addMaterial);
+  document.getElementById("addPractice").addEventListener("click", addPractice);
+  document.getElementById("addStandard").addEventListener("click", addStandard);
+  document.getElementById("addQuestion").addEventListener("click", addQuestion);
+  document.getElementById("saveDiary").addEventListener("click", saveDiary);
+  document.getElementById("evaluateResult").addEventListener("click", evaluateResult);
+  document.getElementById("checkQuiz").addEventListener("click", checkQuiz);
+  document.getElementById("buildAnalytics").addEventListener("click", buildAnalytics);
+  document.getElementById("standardSearch").addEventListener("input", renderStandards);
+
+  document.getElementById("exportData").addEventListener("click", () => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "ert-mchs-data.json";
+    link.click();
+    URL.revokeObjectURL(link.href);
+  });
+
+  document.getElementById("importData").addEventListener("change", event => {
+    importJson(event.target.files[0], imported => {
+      data = { ...data, ...imported };
+      renderAll();
+      alert("Данные импортированы.");
+    });
+  });
+
+  document.getElementById("standardsFile").addEventListener("change", event => {
+    importJson(event.target.files[0], imported => {
+      data.standards = Array.isArray(imported) ? imported : imported.standards;
+      renderStandards();
+    });
+  });
+
+  document.getElementById("questionsFile").addEventListener("change", event => {
+    importJson(event.target.files[0], imported => {
+      data.questions = Array.isArray(imported) ? imported : imported.questions;
+      renderQuiz();
+    });
+  });
+
+  document.getElementById("practiceFile").addEventListener("change", event => {
+    const file = event.target.files[0];
+    if (!file) return;
+    if (file.name.endsWith(".json")) {
+      importJson(file, imported => {
+        data.practices.push(...(Array.isArray(imported) ? imported : imported.practices));
+        renderPractice();
+      });
+    } else {
+      const reader = new FileReader();
+      reader.onload = () => {
+        data.practices.push({ course: 1, week: 1, title: file.name, text: reader.result });
+        saveData(); renderPractice();
+      };
+      reader.readAsText(file);
+    }
+  });
+
+  function renderAll() {
+    renderProfile();
+    renderTheory();
+    renderPractice();
+    renderStandards();
+    renderQuiz();
+    renderHistory();
+    renderCharts();
+  }
+
+  renderAll();
+</script>
+</body>
+</html>
