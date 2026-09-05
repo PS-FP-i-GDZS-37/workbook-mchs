@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Электронная рабочая тетрадь обучающегося Ивановской пожарно-спасательной академии ГПС МЧС России по дисциплине «Физическая подготовка»</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <style>
+        :root {
+            --mc-blue: #0056A7;       /* официальный синий МЧС */
+            --mc-orange: #FF8C00;      /* оранжевый МЧС */
+            --bg: #f4f6f9;
+            --card: #ffffff;
+            --text: #222;
+            --border: #ccc;
+            --green: #2e7d32;
+            --red: #c62828;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--mc-blue), var(--mc-orange));
+            color: #fff;
+            padding: 20px 30px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 8px rgba(0,0,0,.3);
+        }
+
+        header h1 {
+            font-size: 18px;
+            font-weight: 700;
+            line-height: 1.4;
+            text-align: center;
+        }
+
+        header .sub {
+            font-size: 14px;
+            opacity: .95;
+            margin-top: 6px;
+            text-align: center;
+        }
+
+        nav {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            padding: 10px 30px;
+            background: #fff;
+            border-bottom: 3px solid var(--mc-blue);
+            position: sticky;
+            top: 74px;
+            z-index: 99;
+        }
+
+        nav button {
+            background: none;
+            border: none;
+            padding: 8px 14px;
+            cursor: pointer;
+            font-size: 13px;
+            border-radius: 6px;
+            color: #555;
+            transition: .2s;
+        }
+
+        nav button:hover {
+            background: var(--mc-blue);
+            color: #fff;
+        }
+
+        nav button.active {
+            background: var(--mc-blue);
+            color: #fff;
+        }
+
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .card {
+            background: var(--card);
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,.1);
+        }
+
+        .card h2 {
+            color: var(--mc-blue);
+            margin-bottom: 15px;
+            font-size: 20px;
+            border-bottom: 2px solid var(--mc-blue);
+            padding-bottom: 8px;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: #333;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 9px 12px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .btn {
+            background: var(--mc-blue);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: .2s;
+        }
+
+        .btn:hover {
+            background: #00417e;
+        }
+
+        .btn-green {
+            background: var(--green);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--mc-blue);
+            border: 1px solid var(--mc-blue);
+        }
+
+        .btn-outline:hover {
+            background: var(--mc-blue);
+            color: #fff;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+            font-size: 13px;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 8px 10px;
+            text-align: center;
+        }
+
+        th {
+            background: var(--mc-blue);
+            color: #fff;
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 700;
+            color: #fff;
+        }
+
+        .badge-ex { background: var(--green); }
+        .badge-good { background: var(--mc-orange); }
+        .badge-sat { background: #f9a825; color: #333; }
+        .badge-fail { background: var(--red); }
+
+        .accordion-item {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        .accordion-header {
+            padding: 12px 16px;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--mc-blue);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fafafa;
+            transition: .2s;
+        }
+
+        .accordion-header:hover {
+            background: var(--mc-blue);
+            color: #fff;
+        }
+
+        .accordion-header .arrow {
+            transition: .3s;
+        }
+
+        .accordion-header.open .arrow {
+            transform: rotate(180deg);
+        }
+
+        .accordion-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height .4s ease-out;
+            padding: 0 16px;
+        }
+
+        .accordion-body.open {
+            max-height: 50000px;
+            padding: 16px;
+        }
+
+        .accordion-body h4 {
+            color: var(--mc-blue);
+            margin: 12px 0 6px;
+            font-size: 15px;
+        }
+
+        .accordion-body p,
+        .accordion-body li {
+            font-size: 14px;
+            margin-bottom: 6px;
+            line-height: 1.5;
+        }
+
+        .accordion-body ul,
+        .accordion-body ol {
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .calc-result {
+            background: #fff3e0;
+            border-left: 4px solid var(--mc-blue);
+            padding: 12px 16px;
+            margin: 12px 0;
+            border-radius: 0 4px 4px 0;
+            font-size: 14px;
+        }
+
+        .calc-result b {
+            color: var(--mc-blue);
+        }
+
+        .zone-box {
+            display: inline-block;
+            padding: 6px 12px;
+            margin: 3px;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .tabs button {
+            padding: 6px 14px;
+            border: 1px solid var(--border);
+            background: #fff;
+            cursor: pointer;
+            border-radius: 4px;
+            font-size: 13px;
+        }
+
+        .tabs button.active {
+            background: var(--mc-blue);
+            color: #fff;
+            border-color: var(--mc-blue);
+        }
+
+        .chart-box {
+            position: relative;
+            height: 300px;
+            margin: 10px 0;
+        }
+
+        .test-q {
+            margin-bottom: 16px;
+            padding: 12px;
+            background: #fafafa;
+            border-radius: 6px;
+            border-left: 3px solid var(--mc-blue);
+        }
+
+        .test-q .q-text {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .test-opt {
+            display: block;
+            padding: 6px 10px;
+            margin: 3px 0;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .test-opt:hover {
+            background: #e3f2fd;
+        }
+
+        .test-opt.selected {
+            background: #bbdefb;
+            border-color: var(--mc-blue);
+        }
+
+        .test-opt.correct {
+            background: #c8e6c9;
+            border-color: var(--green);
+        }
+
+        .test-opt.wrong {
+            background: #ffcdd2;
+            border-color: var(--red);
+        }
+
+        .progress {
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 4px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: var(--mc-blue);
+            transition: width .3s;
+        }
+
+        .week-block {
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            margin-bottom: 8px;
+            overflow: hidden;
+        }
+
+        .week-header {
+            padding: 10px 14px;
+            cursor: pointer;
+            font-weight: 600;
+            background: #e8f5e9;
+            color: #1b5e20;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .week-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: .3s;
+        }
+
+        .week-body.open {
+            max-height: 3000px;
+            padding: 14px;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
+            margin: 10px 0;
+        }
+
+        .stat-card {
+            background: #f5f5f5;
+            border-radius: 6px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .stat-card .val {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--mc-blue);
+        }
+
+        .stat-card .lbl {
+            font-size: 12px;
+            color: #777;
+            margin-top: 4px;
+        }
+
+        @media (max-width: 768px) {
+            nav { padding: 8px 10px; }
+            main { padding: 10px; }
+            header { padding: 12px 15px; }
+            header h1, header .sub { text-align: left; }
+            .form-row { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Электронная рабочая тетрадь обучающегося Ивановской пожарно-спасательной академии ГПС МЧС России</h1>
+        <div class="sub">по дисциплине «Физическая подготовка»</div>
+    </header>
+
+    <nav id="nav">
+        <button class="active" data-sec="profile">Профиль</button>
+        <button data-sec="theory">Теория</button>
+        <button data-sec="practice">Практика</button>
+        <button data-sec="diary">Дневник</button>
+        <button data-sec="ortho">Ортопроба</button>
+        <button data-sec="charts">Графики</button>
+        <button data-sec="norms">Нормативы</button>
+        <button data-sec="exam">Сдача</button>
+        <button data-sec="test">Тест</button>
+        <button data-sec="analytics">Аналитика</button>
+        <button data-sec="history">История</button>
+    </nav>
+
+    <main>
+        <!-- МОДУЛЬ 1: ПРОФИЛЬ КУРСАНТА -->
+        <section class="section active" id="profile">
+            <div class="card">
+                <h2>Профиль курсанта</h2>
+                <div class="form-row">
+                    <div class="form-group"><label>ФИО</label><input type="text" id="p_fio" placeholder="Иванов Иван Иванович"></div>
+                    <div class="form-group"><label>Пол</label><select id="p_sex"><option value="m">Юноша</option><option value="f">Девушка</option></select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Курс</label><select id="p_course"><option value="1">1 курс</option><option value="2">2 курс</option><option value="3">3 курс</option><option value="4">4 курс</option><option value="5">5 курс</option></select></div>
+                    <div class="form-group"><label>Взвод</label><input type="text" id="p_platoon" placeholder="напр. 11"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Факультет</label><select id="p_fac"><option value="pb">Пожарная безопасность</option><option value="tb">Техносферная безопасность</option></select></div>
+                    <div class="form-group"><label>Специальность</label><select id="p_spec">
+                        <option value="20.03.01">20.03.01 — Техносферная безопасность</option>
+                        <option value="20.05.01">20.05.01 — Пожарная безопасность</option>
+                                                    <option value="40.03.01">40.03.01 — Правовое обеспечение национальной безопасности</option>
+                            <option value="40.05.03">40.05.03 — Судебная экспертиза</option>
+                        </select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>Возраст (лет)</label><input type="number" id="p_age" value="17" min="16" max="30"></div>
+                    <div class="form-group"><label>Рост (см)</label><input type="number" id="p_height" value="175" min="150" max="210"></div>
+                    <div class="form-group"><label>Масса (кг)</label><input type="number" id="p_weight" value="70" min="40" max="150" step="0.1"></div>
+                    <div class="form-group"><label>ЧСС покоя (уд/мин)</label><input type="number" id="p_rhr" value="65" min="40" max="120"></div>
+                </div>
+                <button class="btn" onclick="saveProfile(); calcProfile()">Сохранить и рассчитать</button>
+                <div id="profileResults" class="calc-result"></div>
+            </div>
+        </section>
+
+        <!-- МОДУЛЬ 2: ТЕОРЕТИЧЕСКАЯ ПОДГОТОВКА -->
+        <section class="section" id="theory">
+            <div class="card">
+                <h2>Теоретическая подготовка</h2>
+                <p style="font-size:13px;color:#777;margin-bottom:12px">Нажмите на заголовок, чтобы раскрыть материал.</p>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAcc(this)">1. Физическая культура в общекультурной и профессиональной подготовке обучающихся образовательных организаций МЧС России <span class="arrow">▼</span></div>
+                    <div class="accordion-body">
+                        <h4>1. Определение понятия «физическая культура» и её функции</h4>
+                        <p><b>Физическая культура</b> — часть общей культуры общества, одна из сфер социальной деятельности, направленная на сохранение и укрепление здоровья, развитие физических способностей человека, создание благоприятных условий для его жизнедеятельности.</p>
+                        <p><b>Функции физической культуры:</b></p>
+                        <ul>
+                            <li>Образовательная — формирование системы знаний, умений и навыков</li>
+                            <li>Воспитательная — развитие нравственных и волевых качеств</li>
+                            <li>Оздоровительная — укрепление здоровья, профилактика заболеваний</li>
+                            <li>Рекреативная — организация досуга и отдыха</li>
+                            <li>Прикладная — подготовка к профессиональной деятельности</li>
+                            <li>Профессионально-прикладная — подготовка к специфическим условиям службы в МЧС</li>
+                        </ul>
+                        <h4>2. Физическая культура как научная дисциплина</h4>
+                        <p>Физическая культура как научная дисциплина изучает закономерности формирования и развития физического потенциала человека, методы его совершенствования. В системе МЧС она интегрирует достижения педагогики, физиологии, биомеханики, психологии и спортивной медицины для подготовки специалистов, способных выполнять служебные задачи в экстремальных условиях.</p>
+                        <h4>3. Основные понятия системы «физическая культура»</h4>
+                        <ul>
+                            <li><b>Физическое воспитание</b> — педагогический процесс, направленный на формирование физических качеств и двигательных навыков</li>
+                            <li><b>Физическое развитие</b> — процесс изменения форм и функций организма</li>
+                            <li><b>Физическая подготовка</b> — специализированный процесс, направленный на развитие качеств, необходимых для конкретной деятельности</li>
+                            <li><b>Физическое совершенство</b> — высший уровень физического развития и подготовленности</li>
+                            <li><b>Спорт</b> — соревновательная деятельность и подготовка к ней</li>
+                            <li><b>Двигательная активность</b> — сумма движений, выполняемых человеком</li>
+                        </ul>
+                        <h4>4. Физическая культура как учебная дисциплина в системе МЧС России</h4>
+                        <p>В образовательных организациях МЧС России физическая культура является обязательной учебной дисциплиной, включённой в федеральные государственные образовательные стандарты. Она обеспечивает физическую готовность курсантов к выполнению служебных обязанностей, формирует профессионально важные качества (выносливость, силу, ловкость, быстроту), необходимые при тушении пожаров, ликвидации ЧС, спасательных операциях.</p>
+                        <h4>5. Цель, задачи и средства дисциплины «Физическая культура» в системе МЧС России</h4>
+                        <p><b>Цель:</b> формирование физической культуры личности курсанта и его готовности к профессиональной деятельности в системе МЧС России.</p>
+                        <p><b>Задачи:</b></p>
+                        <ul>
+                            <li>Развитие основных физических качеств</li>
+                            <li>Формирование прикладных двигательных навыков</li>
+                            <li>Воспитание волевых и психологических качеств</li>
+                            <li>Сохранение и укрепление здоровья</li>
+                            <li>Формирование навыков самостоятельных занятий</li>
+                            <li>Профилактика профессиональных заболеваний и травматизма</li>
+                        </ul>
+                        <p><b>Средства:</b> физические упражнения, естественные силы природы (солнце, воздух, вода), гигиенические факторы (режим, питание, отдых).</p>
+                        <h4>6. Ценностные ориентации курсантов в физической культуре</h4>
+                        <p>Ценностные ориентации курсантов в физической культуре включают:</p>
+                        <ul>
+                            <li><b>Физические ценности</b> — здоровье, сила, выносливость, физическое совершенство</li>
+                            <li><b>Социально-психологические ценности</b> — camaraderie, дисциплина, взаимовыручка, уверенность в себе</li>
+                            <li><b>Профессиональные ценности</b> — готовность к службе, способность переносить физические нагрузки в экстремальных условиях</li>
+                            <li><b>Культурные ценности</b> — понимание роли физической культуры в развитии личности, эстетика движений</li>
+                        </ul>
+                        <h4>7. Функции физической культуры в системе МЧС России</h4>
+                        <ul>
+                            <li><b>Профессионально-прикладная</b> — обеспечение физической готовности к тушению пожаров, спасательным работам, ликвидации последствий ЧС</li>
+                            <li><b>Оздоровительная</b> — поддержание оптимального уровня здоровья для несения службы</li>
+                            <li><b>Воспитательная</b> — формирование дисциплинированности, ответственности, воли, способности к самопожертвованию ради спасения людей</li>
+                            <li><b>Образовательная</b> — формирование знаний, умений и навыков по физической подготовке</li>
+                            <li><b>Психологическая</b> — снятие стресса, выработка стрессоустойчивости</li>
+                            <li><b>Рекреативная</b> — восстановление работоспособности после несения службы</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAcc(this)">2. Формы и содержание самостоятельных занятий физическими упражнениями <span class="arrow">▼</span></div>
+                    <div class="accordion-body">
+                        <h4>1. Сущность самостоятельных занятий курсантов в условиях вузов МЧС России</h4>
+                        <p>Самостоятельные занятия физическими упражнениями — это целенаправленная деятельность курсантов, осуществляемая во внеучебное время для совершенствования физической подготовленности, укрепления здоровья и поддержания профессиональной готовности. В условиях вузов МЧС самостоятельные занятия являются неотъемлемой частью системы физической подготовки и дополняют аудиторные занятия.</p>
+                        <h4>2. Основные понятия</h4>
+                        <ul>
+                            <li><b>Самостоятельная тренировка</b> — систематическое выполнение физических упражнений по индивидуальному плану</li>
+                            <li><b>Утренняя гимнастика</b> — комплекс упражнений для активизации организма после сна</li>
+                            <li><b>Физкультурная пауза</b> — кратковременные упражнения для снятия утомления</li>
+                            <li><b>Индивидуальный план</b> — программа тренировок, составленная с учётом уровня подготовленности и целей</li>
+                        </ul>
+                        <h4>3. Мотивация и целенаправленность самостоятельных занятий</h4>
+                        <p>Мотивами самостоятельных занятий выступают: укрепление здоровья, улучшение внешнего вида, подготовка к сдаче нормативов, достижение спортивных результатов, профилактика заболеваний, снятие психологического напряжения. Целенаправленность определяется конкретными задачами: развитие выносливости, силы, быстроты, ловкости, гибкости.</p>
+                        <h4>4. Формы, средства и основное содержание самостоятельных занятий</h4>
+                        <p><b>Формы:</b> утренняя гимнастика, самостоятельные тренировки, кроссовый бег, плавание, занятия на спортивных сооружениях, участие в спортивных секциях.</p>
+                        <p><b>Средства:</b> упражнения для развития физических качеств, прикладные упражнения, спортивные и подвижные игры, упражнения на тренажёрах, естественные силы природы.</p>
+                        <p><b>Содержание:</b> определяется целями и включает упражнения на выносливость (бег, плавание), силу (упражнения с отягощениями), быстроту (спринт), ловкость (спортивные игры), гибкость (стретчинг).</p>
+                        <h4>5. Выбор систем физических упражнений для самостоятельных занятий</h4>
+                        <p>Выбор зависит от уровня подготовленности, возраста, состояния здоровья, профессиональных задач. Рекомендуется чередовать упражнения на различные физические качества, учитывать принципы постепенности и систематичности. Для курсантов МЧС приоритет — упражнения, развивающие профессионально важные качества: общую выносливость, силовые способности, координацию.</p>
+                        <h4>6. Планирование самостоятельных занятий</h4>
+                        <p>Планирование включает: определение целей, составление программы, выбор дней и времени, дозирование нагрузки, контроль за состоянием. План должен быть реалистичным, учитывать восстановление, предусматривать разгрузочные дни. Ведение дневника самоконтроля обязательно.</p>
+                        <h4>7. Развитие физических качеств у курсантов в сенситивные периоды</h4>
+                        <p>Сенситивные периоды — возрастные этапы, наиболее благоприятные для развития определённых качеств:</p>
+                        <ul>
+                            <li>Быстрота — 15–17 лет</li>
+                            <li>Сила — 17–19 лет</li>
+                            <li>Силовая выносливость — 18–20 лет</li>
+                            <li>Аэробная выносливость — 17–20 лет</li>
+                            <li>Гибкость — 16–18 лет</li>
+                            <li>Ловкость — 15–18 лет</li>
+                        </ul>
+                        <p>Курсанты 1–2 курса (17–19 лет) находятся в благоприятном периоде для развития силы, быстроты и выносливости.</p>
+                        <h4>8. Управление самостоятельными занятиями</h4>
+                        <p>Управление включает: планирование, контроль, корректировку. Контроль осуществляется по субъективным (самочувствие, сон, аппетит) и объективным (ЧСС, масса тела, ортостатическая проба) показателям. При ухудшении показателей необходимо снизить нагрузку или сделать перерыв.</p>
+                        <h4>9. Границы интенсивности нагрузок в условиях самостоятельных занятий</h4>
+                        <p>Интенсивность определяется по ЧСС. Для оздоровительных целей: ЧСС = (220 — возраст) × 0,65–0,85. Оптимальный диапазон — 130–170 уд/мин. Низкая интенсивность: 50–60% от максимальной ЧСС. Умеренная: 60–70%. Высокая: 75–85%. Не рекомендуется превышать 85% без медицинского контроля.</p>
+                        <h4>10. Самоконтроль занимающихся за состоянием своего организма</h4>
+                        <p>Самоконтроль включает регулярное наблюдение за:</p>
+                        <ul>
+                            <li><b>ЧСС</b> — утренняя (в положении лёжа), перед тренировкой, после тренировки</li>
+                            <li><b>Ортостатическая проба</b> — разница ЧСС лёжа и стоя</li>
+                            <li><b>Масса тела</b> — измерение 1–2 раза в неделю</li>
+                            <li><b>ЖЕЛ (жизненная ёмкость лёгких)</b> — при наличии спирометра</li>
+                            <li><b>Субъективные показатели:</b> самочувствие, сон, аппетит, желание тренироваться, потливость, настроение</li>
+                        </ul>
+                        <p>Дневник самоконтроля ведётся ежедневно. При отклонениях — корректировка нагрузки.</p>
+                        <h4>11. Профилактика травматизма в процессе самостоятельных занятий</h4>
+                        <ul>
+                            <li>Тщательная разминка перед тренировкой (10–15 минут)</li>
+                            <li>Соблюдение принципа постепенности увеличения нагрузок</li>
+                            <li>Правильная техника выполнения упражнений</li>
+                            <li>Соответствие обуви и инвентаря задачам тренировки</li>
+                            <li>Учёт погодных условий (температура, влажность, ветер)</li>
+                            <li>Недопустимость тренировок в болезненном состоянии</li>
+                            <li>Восстановление между тренировками (сон не менее 7–8 часов)</li>
+                            <li>Сбалансированное питание и достаточный питьевой режим</li>
+                            <li>Заминка и растяжка после тренировки</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header" onclick="toggleAcc(this)">3. Основы физиологии тренировки <span class="arrow">▼</span></div>
+                    <div class="accordion-body">
+                        <h4>1. Энергетическое обеспечение мышечной деятельности</h4>
+                        <p>Работа мышц обеспечивается тремя механизмами: креатинфосфатным (анаэробный алактатный, 5–10 сек), гликолитическим (анаэробный лактатный, 30–90 сек) и аэробным (окислительным, от 2 минут и более). При развитии выносливости основную роль играет аэробный путь, при силовой работе — анаэробные механизмы.</p>
+                        <h4>2. Сверхвосстановление (суперкомпенсация)</h4>
+                        <p>После тренировочной нагрузки работоспособность снижается, затем в фазе восстановления превышает исходный уровень — это сверхвосстановление. Оптимальный момент для следующей тренировки — фаза суперкомпенсации. Интервалы между тренировками: для силы — 48–72 часа, для выносливости — 24–48 часов.</p>
+                        <h4>3. Адаптация к физическим нагрузкам</h4>
+                        <p>Адаптация — приспособление организма к физическим нагрузкам. Бывает срочная (в процессе одной тренировки) и долговременная (в результате систематических занятий). Долговременная адаптация выражается в увеличении миокарда, капилляризации мышц, повышении уровня гемоглобина, росте митохондрий.</p>
+                        <h4>4. Утомление и восстановление</h4>
+                        <p>Утомление — временное снижение работоспособности. Фазы: компенсированная (без снижения результата), декомпенсированная (снижение результата). Восстановление: быстрое (минуты, часы) и медленное (сутки). Средства восстановления: активный отдых, питание, сон, массаж, контрастные ванны.</p>
+                        <h4>5. Принципы тренировки</h4>
+                        <ul>
+                            <li>Постепенность — плавное увеличение нагрузки</li>
+                            <li>Систематичность — регулярность занятий</li>
+                            <li>Повторность — многократное выполнение упражнений</li>
+                            <li>Индивидуализация — учёт индивидуальных особенностей</li>
+                            <li>Цикличность — чередование нагрузок и отдыха</li>
+                            <li>Вариативность — разнообразие средств и методов</li>
+                        </ul>
+                        <h4>6. Динамика работоспособности в течение тренировки</h4>
+                        <p>Тренировка включает: разминку (врабатывание), основную часть (устойчивое состояние), заминку (снижение нагрузки). Врабатывание занимает 10–15 минут, «мёртвая точка» может возникать на 3–5 минуте, после чего наступает устойчивое состояние.</p>
+                        <h4>7. Гипоксические тренировки</h4>
+                        <p>Тренировки в условиях недостатка кислорода (среднегорье, гипоксикаторы) стимулируют выработку эритропоэтина, увеличение количества эритроцитов, улучшение кислородтранспортной функции крови. Для курсантов МЧС актуальны при подготовке к работе в задымлённых помещениях.</p>
+                        <h4>8. Мышечные волокна и их типы</h4>
+                        <p>Медленноокисляющиеся (тип I) — выносливость, работают в аэробном режиме. Быстрые гликолитические (тип IIb) — сила и скорость, анаэробный режим. Промежуточные (тип IIa) — универсальные. Соотношение типов волокон генетически обусловлено, но тренинг может изменять характеристики IIa типа.</p>
+                        <h4>9. Нервно-гуморальная регуляция</h4>
+                        <p>При физической нагрузке активируется симпатоадреналовая система: адреналин и норадреналин повышают ЧСС, артериальное давление, выброс глюкозы. При длительных нагрузках включается гипофизарно-адренокортикальная система (кортизол). После тренировки преобладает парасимпатическая система, способствующая восстановлению.</p>
+                        <h4>10. Перетренированность</h4>
+                                                <p>Тренировки в условиях недостатка кислорода (среднегорье, гипоксикаторы) стимулируют выработку эритропоэтина, увеличение количества эритроцитов, улучшение кислородтранспортной функции крови. Для курсантов МЧС актуальны при подготовке к работе в задымлённых помещениях.</p>
+                        <h4>8. Мышечные волокна и их типы</h4>
+                        <p>Медленноокисляющиеся (тип I) — выносливость, работают в аэробном режиме. Быстрые гликолитические (тип IIb) — сила и скорость, анаэробный режим. Промежуточные (тип IIa) — универсальные. Соотношение типов волокон генетически обусловлено, но тренинг может изменять характеристики IIa типа.</p>
+                        <h4>9. Нервно-гуморальная регуляция</h4>
+                        <p>При физической нагрузке активируется симпатоадреналовая система: адреналин и норадреналин повышают ЧСС, артериальное давление, выброс глюкозы. При длительных нагрузках включается гипофизарно-адренокортикальная система (кортизол). После тренировки преобладает парасимпатическая система, способствующая восстановлению.</p>
+                        <h4>10. Перетренированность</h4>
+                        <p><b>Перетренированность</b> — патологическое состояние, возникающее при хроническом превышении нагрузки над восстановлением. Проявляется снижением результатов, апатией, нарушением сна, повышением ЧСС покоя, частыми простудами.</p>
+                        <p><b>Признаки:</b></p>
+                        <ul>
+                            <li>Снижение силовых и скоростных показателей на 10–15%</li>
+                            <li>Ухудшение самочувствия, раздражительность</li>
+                            <li>Нарушение сна и аппетита</li>
+                            <li>Учащение ЧСС покоя на 10–20 уд/мин</li>
+                            <li>Замедление восстановления после стандартной нагрузки</li>
+                        </ul>
+                        <p><b>Профилактика:</b> соблюдение принципа постепенности, контроль ЧСС и самочувствия, включение разгрузочных недель, достаточный сон (8–9 часов), сбалансированное питание, регулярное медицинское обследование.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- МОДУЛЬ 3: ПРАКТИКА -->
+        <section class="section" id="practice">
+            <div class="card">
+                <h2>Практические задания</h2>
+                <div class="filter-row">
+                    <select id="pr-week"><option value="1">Неделя 1</option><option value="2">Неделя 2</option><option value="3">Неделя 3</option><option value="4">Неделя 4</option><option value="5">Неделя 5</option><option value="6">Неделя 6</option><option value="7">Неделя 7</option><option value="8">Неделя 8</option></select>
+                    <input type="text" id="pr-search" placeholder="Поиск упражнения">
+                    <button class="btn btn-outline" onclick="renderPractice()">Применить фильтр</button>
+                </div>
+                <div id="practiceContent">
+                    <!-- Сюда JS будет вставлять контент по неделям -->
+                    <p style="color:#777;text-align:center;margin:40px 0">Выберите неделю для отображения плана тренировок</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- МОДУЛЬ 4: ДНЕВНИК САМОКОНТРОЛЯ -->
+        <section class="section" id="diary">
+            <div class="card">
+                <h2>Дневник самоконтроля</h2>
+                <div class="form-row">
+                    <div class="form-group"><label>Дата</label><input type="date" id="d_date"></div>
+                    <div class="form-group"><label>Самочувствие (1–5)</label><select id="d_feel"><option value="1">1 — очень плохо</option><option value="2">2 — плохо</option><option value="3">3 — нормально</option><option value="4">4 — хорошо</option><option value="5">5 — отлично</option></select></div>
+                    <div class="form-group"><label>Сон (ч)</label><input type="number" id="d_sleep" step="0.5" min="4" max="12"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label>ЧСС утром (уд/мин)</label><input type="number" id="d_rhr" min="40" max="120"></div>
+                    <div class="form-group"><label>Ортопроба (разница ЧСС лёжа/стоя)</label><input type="number" id="d_ortho" step="1"></div>
+                    <div class="form-group"><label>Масса тела (кг)</label><input type="number" id="d_weight" step="0.1"></div>
+                </div>
+                <div class="form-group"><label>Комментарий</label><textarea id="d_comment" rows="3" style="width:100%"></textarea></div>
+                <button class="btn" onclick="saveDiary()">Сохранить запись</button>
+                <div id="diaryList" style="margin-top:20px"></div>
+            </div>
+        </section>
+
+        <!-- МОДУЛЬ 5: ОРТОПРОБА -->
+        <section class="section" id="ortho">
+            <div class="card">
+                <h2>Ортостатическая проба</h2>
+                <p style="font-size:13px;color:#777">Методика: измерить ЧСС в положении лёжа (5 минут покоя), затем сразу после вставания. Разница = ЧСС стоя − ЧСС лёжа.</p>
+                <div class="form-row">
+                    <div class="form-group"><label>ЧСС лёжа (уд/мин)</label><input type="number" id="o_rhr_supine" min="40" max="120"></div>
+                    <div class="form-group"><label>ЧСС стоя (уд/мин)</label><input type="number" id="o_rhr_standing" min="40" max="160"></div>
+                </div>
+                <button class="btn" onclick="calcOrtho()">Рассчитать пробу</button>
+                <div id="orthoResult" class="calc-result"></div>
+            </div>
+        </section>
+
+        <!-- МОДУЛЬ 6: ГРАФИКИ -->
+        <section class="section" id="charts">
+            <div class="card">
+                <h2>Графики динамики показателей</h2>
+                <div class="chart-box"><canvas id="weightChart"></canvas></div>
+                <div class="chart-box"><canvas id="hrChart"></canvas></div>
+                <div class="chart-box"><canvas id="performanceChart"></canvas></div>
+            </div>
+        </section>
+
+        <!-- МОДУЛЬ 7: НОРМАТИВЫ -->
+        <section class="section" id="norms">
+            <div class="card">
+                <h2>Нормативы по физической подготовке (Приказ МЧС № 153)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Упражнение</th>
+                            <th>Юноши (мин. балл)</th>
+                            <th>Девушки (мин. балл)</th>
+                            <th>Оценка «отлично»</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Подтягивание на перекладине</td><td>12 раз</td><td>—</td><td>18+ раз</td></tr>
+                        <tr><td>Отжимания от пола</td><td>—</td><td>20 раз</td><td>30+ раз</td></tr>
+                        <tr><td>Бег 100 м</td><td>13.5 с</td><td>16.5 с</td><td>12.5 с / 15.5 с</td></tr>
+                        <tr><td>Кросс 3000 м</td><td>11.30 мин</td><td>14.00 мин</td><td>10.30 мин / 13.00 мин</td></tr>
+                        <tr><td>Челночный бег 10×10 м</td><td>26.0 с</td><td>29.0 с</td><td>24.5 с / 27.5 с</td></tr>
+                    </tbody>
+                </table>
+                <p style="font-size:12px;color:#777;margin-top:10px">Нормативы приведены справочно, актуальные значения уточняйте в действующей редакции Приказа МЧС № 153.</p>
+            </div>
+        </section>
+
+        <!-- МОДУЛЬ 8: СДАЧА НОРМАТИВОВ -->
+        <section class="section" id="exam">
+            <div class="card">
+                <h2>Сдача нормативов</h2>
+                <div class="form-row">
+                    <div class="form-group"><label>Вид норматива</label><select id="e_norm"><option value="pull">Подтягивания</option><option value="push">Отжимания</option><option value="run100">Бег 100 м</option><option value="run3k">Кросс 3 км</option><option value="shuttle">Челночный бег</option></select></div>
+                    <div class="form-group"><label>Результат</label><input type="text" id="e_result" placeholder="напр. 15 раз или 12.4 с"></div>
+                    <div class="form-group"><label>Оценка</label><select id="e_grade"><option value="fail">Не сдал</option><option value="sat">Удовлетворительно</option><option value="good">Хорошо</option><option value="ex">Отлично</option></select></div>
+                </div>
+                <button class="btn" onclick="saveExam()">Зафиксировать результат</button>
+                <div id="examList" style="margin-top:20px"></div>
+            </div>
+        </section>
+
+        <!-- МОДУЛЬ 9: ТЕСТ -->
+        <section class="section" id="test">
+            <div class="card">
+                <h2>Тестирование теоретических знаний</h2>
+                <div id="testContent"></div>
+                <button class="btn btn-green" onclick="submitTest()">Завершить тест</button>
+                <div id="testResult" style="margin-top:15px"></div>
+            </div>
+        </section>
+
+        <!-- МОДУЛЬ 10: АНАЛИТИКА -->
+        <section class="section" id="analytics">
+            <div class="card">
+                <h2>Аналитика успеваемости</h2>
+                <div class="stat-grid">
+                    <div class="stat-card"><div class="val" id="a_avg_hr">0</div><div class="lbl">Ср. ЧСС покоя</div></div>
+                    <div class="stat-card"><div class="val" id="a_weight_avg">0</div><div class="lbl">Ср. масса (кг)</div></div>
+                    <div class="stat-card"><div class="val" id="a_tests_passed">0</div><div class="lbl">Сдано тестов</div></div>
+                    <div class="stat-card"><div class="val" id="a_exams_passed">0</div><div class="lbl">Сдано нормативов</div></div>
+                </div>
+                <div style="margin-top:20px"><b>Динамика за последние 30 дней:</b></div>
+                <div class="chart-box"><canvas id="analyticsChart"></canvas></div>
+            </div>
+        </section>
+
+        <!-- МОДУЛЬ 11: ИСТОРИЯ ДЕЙСТВИЙ -->
+        <section class="section" id="history">
+            <div class="card">
+                <h2>История действий</h2>
+                <div id="historyList" style="font-size:13px;color:#555;line-height:1.6"></div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        // --- Переключение вкладок ---
+        document.querySelectorAll('nav button').forEach(btn => {
+            btn.addEventListener('click', () => {
+                // убираем active у всех кнопок и секций
+                document.querySelectorAll('nav button, .section').forEach(el => el.classList.remove('active'));
+                // добавляем active текущей кнопке и секции
+                btn.classList.add('active');
+                const secId = btn.getAttribute('data-sec');
+                document.getElementById(secId).classList.add('active');
+            });
+        });
+
+        // --- Аккордеон (теория) ---
+        function toggleAcc(header) {
+            const body = header.nextElementSibling;
+            const isOpen = body.classList.contains('open');
+            // закрываем все
+            document.querySelectorAll('.accordion-body').forEach(b => b.classList.remove('open'));
+            document.querySelectorAll('.accordion-header').forEach(h => h.classList.remove('open'));
+            if (!isOpen) {
+                header.classList.add('open');
+                body.classList.add('open');
+            }
+        }
+
+        // --- Профиль: сохранение и расчёты ---
+        function saveProfile() {
+            const data = {
+                fio: document.getElementById('p_fio').value,
+                sex: document.getElementById('p_sex').value,
+                course: document.getElementById('p_course').value,
+                platoon: document.getElementById('p_platoon').value,
+                fac: document.getElementById('p_fac').value,
+                spec: document.getElementById('p_spec').value,
+                age: Number(document.getElementById('p_age').value),
+                height: Number(document.getElementById('p_height').value),
+                weight: Number(document.getElementById('p_weight').value),
+                rhr: Number(document.getElementById('p_rhr').value)
+            };
+            localStorage.setItem('ert_profile', JSON.stringify(data));
+            logHistory('Сохранён профиль курсанта: ' + data.fio);
+        }
+
+        function calcProfile() {
+            const age = Number(document.getElementById('p_age').value);
+            const height = Number(document.getElementById('p_height').value);
+            const weight = Number(document.getElementById('p_weight').value);
+            const rhr = Number(document.getElementById('p_rhr').value);
+
+            if (!age || !height || !weight) return;
+
+            // ИМТ
+            const bmi = weight / ((height / 100) ** 2);
+
+            // Возрастная группа по Приказу МЧС № 153 (упрощённо)
+            let ageGroup = '';
+            if (age <= 20) ageGroup = '1-я возрастная группа (до 25 лет)';
+            else if (age <= 30) ageGroup = '2-я возрастная группа (25–30 лет)';
+            else ageGroup = '3-я возрастная группа (31–35 лет)'; // для примера
+
+            // Пульсовые зоны по Карвонену
+            const hrMax = 220 - age;
+            const hrr = hrMax - rhr;
+            const zoneLow = Math.round(rhr + (hrr * 0.6));
+            const zoneMod = Math.round(rhr + (hrr * 0.7));
+            const zoneHigh = Math.round(rhr + (hrr * 0.85));
+
+            const resEl = document.getElementById('profileResults');
+            resEl.innerHTML = `
+                <b>ИМТ:</b> ${bmi.toFixed(1)} (норма: 18.5–24.9)<br>
+                <b>Возрастная группа:</b> ${ageGroup}<br>
+                <b>Пульсовые зоны (по Карвонену):</b><br>
+                &nbsp;&nbsp;• Низкая интенсивность: ${zoneLow} уд/мин<br>
+                &nbsp;&nbsp;• Умеренная: ${zoneMod} уд/мин<br>
+                &nbsp;&nbsp;• Высокая: ${zoneHigh} уд/мин
+            `;
+        }
+
+        // --- Дневник самоконтроля ---
+        function saveDiary() {
+            const date = document.getElementById('d_date').value;
+            const feel = document.getElementById('d_feel').value;
+            const sleep = document.getElementById('d_sleep').value;
+            const rhr = document.getElementById('d_rhr').value;
+            const ortho = document.getElementById('d_ortho').value;
+            const weight = document.getElementById('d_weight').value;
+            const comment = document.getElementById('d_comment').value;
+
+            const entry = { date, feel, sleep, rhr, ortho, weight, comment };
+                        const diary = JSON.parse(localStorage.getItem('ert_diary')) || [];
+            diary.push(entry);
+            localStorage.setItem('ert_diary', JSON.stringify(diary));
+
+            renderDiaryList();
+            logHistory('Добавлена запись в дневник самоконтроля');
+        }
+
+        function renderDiaryList() {
+            const listEl = document.getElementById('diaryList');
+            const diary = JSON.parse(localStorage.getItem('ert_diary')) || [];
+            if (diary.length === 0) {
+                listEl.innerHTML = '<p style="color:#777;text-align:center">Записей нет</p>';
+                return;
+            }
+            listEl.innerHTML = diary.slice().reverse().map(d => `
+                <div class="card" style="padding:12px;margin-bottom:10px">
+                    <div><b>${d.date}</b> | Самочувствие: ${d.feel}/5 | Сон: ${d.sleep} ч</div>
+                    <div>ЧСС: ${d.rhr} уд/мин | Ортопроба: ${d.ortho} уд/мин | Масса: ${d.weight} кг</div>
+                    ${d.comment ? `<div style="margin-top:6px;font-size:13px;color:#555">💬 ${d.comment}</div>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // --- Ортопроба ---
+        function calcOrtho() {
+            const rhrSupine = Number(document.getElementById('o_rhr_supine').value);
+            const rhrStanding = Number(document.getElementById('o_rhr_standing').value);
+
+            if (!rhrSupine || !rhrStanding) {
+                alert('Введите оба значения ЧСС');
+                return;
+            }
+
+            const diff = rhrStanding - rhrSupine;
+            let status = '';
+            let colorClass = '';
+
+            if (diff <= 12) status = 'Отличная адаптация (норма)';
+            else if (diff <= 20) status = 'Удовлетворительная адаптация';
+            else status = 'Напряжённая адаптация, требуется контроль врача';
+
+            document.getElementById('orthoResult').innerHTML = `
+                Разница ЧСС (стоя − лёжа): <b>${diff} уд/мин</b><br>
+                Оценка: <b>${status}</b>
+            `;
+            logHistory(`Рассчитана ортопроба: разница ${diff} уд/мин`);
+        }
+
+        // --- Практика: план по неделям ---
+        const practicePlans = {
+            '1': [
+                { name: 'Разминка (10–15 мин)', desc: 'Суставная гимнастика, динамическая растяжка, лёгкий бег 5 мин' },
+                { name: 'Бег 2 км', desc: 'Темп умеренный, ЧСС в зоне 65–75% от максимума' },
+                { name: 'Силовая часть', desc: 'Отжимания 3×15, приседания 3×20, планка 3×45 с' },
+                { name: 'Заминка', desc: 'Статическая растяжка 10 мин' }
+            ],
+            '2': [
+                { name: 'Разминка', desc: 'Суставная гимнастика + прыжки на месте 2 мин' },
+                { name: 'Интервальный бег', desc: '400 м быстро + 200 м медленно × 4 круга' },
+                { name: 'Полоса препятствий (учебная)', desc: 'Преодоление 3 элементов, техника без спешки' },
+                { name: 'Пресс и кора', desc: 'Скручивания 3×20, боковая планка 3×30 с на каждую сторону' }
+            ],
+            '3': [
+                { name: 'Разминка', desc: 'Динамическая растяжка + выпады с поворотом' },
+                { name: 'Кросс 3 км', desc: 'Цель — удержать темп, не допускать резкого падения скорости' },
+                { name: 'Подтягивания', desc: '3 подхода, максимум повторений (с отдыхом 2 мин)' },
+                { name: 'Растяжка и восстановление', desc: 'Фоам-роллер, статические упражнения' }
+            ],
+            '4': [
+                { name: 'Разминка', desc: 'Активация ягодиц и задней поверхности бедра' },
+                { name: 'Челночный бег 10×10 м', desc: '2 серии по 5 отрезков, отдых между сериями 3 мин' },
+                { name: 'Круговая тренировка', desc: 'Станция 1: берпи 1 мин; Станция 2: тяга гири/гантели 12 раз; Станция 3: выпрыгивания 15 раз. 3 круга, отдых между станциями 30 с' },
+                { name: 'Дыхательные упражнения', desc: 'Диафрагмальное дыхание 3–5 минут' }
+            ],
+            '5': [
+                { name: 'Разминка', desc: 'Лёгкий бег 5–7 мин + координационные упражнения' },
+                { name: 'Учебная эвакуация (имитация)', desc: 'Переноска условного пострадавшего 50 м, работа в паре' },
+                { name: 'Силовая выносливость', desc: 'Приседания с собственным весом 4×20, отжимания 4×максимально' },
+                { name: 'Заминка и контроль ЧСС', desc: 'Ходьба 5 мин, измерение ЧСС каждые 2 минуты до снижения до 110–120 уд/мин' }
+            ],
+            '6': [
+                { name: 'Разминка', desc: 'Мобилизация плечевого пояса и тазобедренных суставов' },
+                { name: 'Бег 4 км', desc: 'Чередование темпа: 1 км быстрый, 1 км спокойный × 2' },
+                { name: 'Работа на турнике', desc: 'Подтягивания 3×макс, выходы силой 2×3 (по возможности)' },
+                { name: 'Восстановление', desc: 'Миофасциальный релиз, растяжка' }
+            ],
+            '7': [
+                { name: 'Разминка', desc: 'Комплекс на координацию и баланс' },
+                { name: 'Полоса с элементами ГДЗС (учебная)', desc: 'Передвижение в ограниченном пространстве, перенос груза 16 кг на 30 м' },
+                { name: 'Функциональная силовая', desc: 'Тяга саней/резина 3×20 м, махи гирей 3×15' },
+                { name: 'Контроль пульса и самочувствия', desc: 'Фиксация показателей в дневнике' }
+            ],
+            '8': [
+                { name: 'Разминка', desc: 'Общая подготовка + имитация работы в СИЗОД' },
+                { name: 'Комплексное испытание', desc: 'Комбинированный маршрут: бег, подъём по лестнице, переноска груза, финиш с контролем ЧСС' },
+                { name: 'Анализ ошибок и техника', desc: 'Разбор видео/заметок, работа над слабыми звеньями' },
+                { name: 'Реабилитация и отдых', desc: 'Активное восстановление, сон, питание' }
+            ]
+        };
+
+        function renderPractice() {
+            const week = document.getElementById('pr-week').value;
+            const search = document.getElementById('pr-search').value.toLowerCase();
+            const content = document.getElementById('practiceContent');
+
+            const plan = practicePlans[week] || [];
+            const filtered = plan.filter(p => p.name.toLowerCase().includes(search) || p.desc.toLowerCase().includes(search));
+
+            if (filtered.length === 0) {
+                content.innerHTML = '<p style="color:#777;text-align:center">Упражнений не найдено по фильтру</p>';
+                return;
+            }
+
+            content.innerHTML = filtered.map(p => `
+                <div class="card" style="padding:14px">
+                    <h3>${p.name}</h3>
+                    <p style="font-size:14px;color:#555;line-height:1.5">${p.desc}</p>
+                </div>
+            `).join('');
+            logHistory(`Отображён план тренировок: неделя ${week}`);
+        }
+
+        // --- Нормативы: сдача ---
+        function saveExam() {
+            const norm = document.getElementById('e_norm').value;
+            const result = document.getElementById('e_result').value;
+            const grade = document.getElementById('e_grade').value;
+
+            if (!norm || !result) {
+                alert('Заполните вид норматива и результат');
+                return;
+            }
+
+            const exam = JSON.parse(localStorage.getItem('ert_exams')) || [];
+            exam.push({ norm, result, grade, date: new Date().toLocaleDateString('ru-RU') });
+            localStorage.setItem('ert_exams', JSON.stringify(exam));
+
+            renderExamList();
+            logHistory(`Сдан норматив: ${norm}, результат: ${result}, оценка: ${grade}`);
+        }
+
+        function renderExamList() {
+            const listEl = document.getElementById('examList');
+            const exams = JSON.parse(localStorage.getItem('ert_exams')) || [];
+            if (exams.length === 0) {
+                listEl.innerHTML = '<p style="color:#777;text-align:center">Результатов сдачи нормативов нет</p>';
+                return;
+            }
+            listEl.innerHTML = exams.slice().reverse().map(e => `
+                <div class="card" style="padding:12px;margin-bottom:10px">
+                    <div><b>${e.date}</b> | Упражнение: ${e.norm}</div>
+                    <div>Результат: ${e.result} | Оценка: <span style="font-weight:bold;color:${e.grade==='ex'?'#2e7d32':e.grade==='good'?'#1565c0':e.grade==='sat'?'#f9a825':'#c62828'}">${e.grade}</span></div>
+                </div>
+            `).join('');
+        }
+
+        // --- Тест ---
+        const testQuestions = [
+            { q: 'Что такое физическая культура в системе МЧС России?', options: ['Часть общей культуры общества, направленная на сохранение здоровья и подготовку к службе', 'Только спорт высших достижений', 'Только утренняя зарядка'], correct: 0 },
+            { q: 'Какой механизм энергообеспечения работает при беге на 100 м?', options: ['Аэробный', 'Креатинфосфатный', 'Гликолитический'], correct: 1 },
+            { q: 'Какая разница ЧСС при ортопробе считается нормой?', options: ['Более 30 уд/мин', '12–20 уд/мин', 'До 12 уд/мин'], correct: 2 },
+            { q: 'Что отражает ИМТ?', options: ['Соотношение массы и роста', 'Уровень выносливости', 'Частоту сердечных сокращений'], correct: 0 },
+            { q: 'Какой принцип тренировки предполагает постепенное увеличение нагрузки?', options: ['Вариативность', 'Постепенность', 'Цикличность'], correct: 1 }
+        ];
+
+        let currentTestIndex = 0;
+        let userAnswers = [];
+
+        function initTest() {
+            currentTestIndex = 0;
+            userAnswers = [];
+            renderTestQuestion();
+        }
+
+        function renderTestQuestion() {
+            const container = document.getElementById('testContent');
+            if (currentTestIndex >= testQuestions.length) {
+                container.innerHTML = '<p>Тест завершён. Нажмите «Завершить тест» для оценки.</p>';
+                return;
+            }
+            const q = testQuestions[currentTestIndex];
+            container.innerHTML = `
+                <div class="test-q">
+                    <div class="q-text">Вопрос ${currentTestIndex + 1} из ${testQuestions.length}: ${q.q}</div>
+                    ${q.options.map((opt, i) => `
+                        <label class="test-opt" onclick="selectTestOption(${i})">
+                            <input type="radio" name="test-opt" style="display:none" value="${i}">
+                            ${opt}
+                        </label>
+                    `).join('')}
+                </div>
+                <button class="btn btn-outline" onclick="nextTestQuestion()" style="margin-top:10px">Далее</button>
+            `;
+        }
+
+        function selectTestOption(i) {
+            userAnswers[currentTestIndex] = i;
+            const opts = document.querySelectorAll('.test-opt');
+            opts.forEach(el => el.classList.remove('selected'));
+            const selected = opts[i];
+            if (selected) selected.classList.add('selected');
+        }
+
+        function nextTestQuestion() {
+            if (userAnswers[currentTestIndex] === undefined) {
+                alert('Выберите вариант ответа');
+                return;
+            }
+            currentTestIndex++;
+            renderTestQuestion();
+        }
+
+        function submitTest() {
+            if (currentTestIndex < testQuestions.length) {
+                alert('Дойдите до конца теста');
+                return;
+            }
+            const correctCount = userAnswers.reduce((sum, ans, idx) => sum + (ans === testQuestions[idx].correct ? 1 : 0), 0);
+            const total = testQuestions.length;
+            const percent = Math.round((correctCount / total) * 100);
+
+            let badgeClass = '';
+            let text = '';
+            if (percent >= 85) { badgeClass = 'badge-ex'; text = 'Отлично'; }
+            else if (percent >= 70) { badgeClass = 'badge-good'; text = 'Хорошо'; }
+            else if (percent >= 50) { badgeClass = 'badge-sat'; text = 'Удовлетворительно'; }
+            else { badgeClass = 'badge-fail'; text = 'Неудовлетворительно'; }
+
+            document.getElementById('testResult').innerHTML = `
+                <div style="padding:16px;background:#fff;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.1)">
+                    <b>Результат теста:</b> ${correctCount} из ${total} (${percent}%)<br>
+                    <span class="badge ${badgeClass}">${text}</span>
+                </div>
+            `;
+            logHistory(`Пройден тест: ${percent}% правильных ответов`);
+        }
+
+        initTest();
+
+        // --- Графики и аналитика ---
+        let weightChart, hrChart, performanceChart, analyticsChart;
+
+        function drawCharts() {
+            const ctxW = document.getElementById('weightChart').getContext('2d');
+            const ctxHR = document.getElementById('hrChart').getContext('2d');
+            const ctxPerf = document.getElementById('performanceChart').getContext('2d');
+            const ctxAn = document.getElementById('analyticsChart').getContext('2d');
+
+            // Пример данных (в реальности брать из localStorage)
+            const weights = [70, 70.2, 69.8, 70.1, 70.5, 70.3, 70];
+            const hrs = [65, 64, 66, 63, 65, 64, 65];
+            const dates = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
+            weightChart = new Chart(ctxW, {
+                type: 'line',
+                data: { labels: dates, datasets: [{ label: 'Масса тела (кг)', data: weights, borderColor: '#0056A7', fill: false }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
+            });
+
+            hrChart = new Chart(ctxHR, {
+                type: 'line',
+                data: { labels: dates, datasets: [{ label: 'ЧСС покоя (уд/мин)', data: hrs, borderColor: '#FF8C00', fill: false }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top' } } }
+            });
+
+            performanceChart = new Chart(ctxPerf, {
+                type: 'bar',
+                data: { labels: ['Подтягивания', 'Отжимания', 'Бег 100м', 'Кросс 3км'], datasets: [{ label: 'Результаты', data: [15, 35, 13.2, 11.15], borderColor: '#0056A7', backgroundColor: '#e3f2fd' }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { position: 'top' } } }
+            });
+
+            analyticsChart = new Chart(ctxAn, {
+                type: 'radar',
+                data: { labels: ['Сила', 'Выносливость', 'Скорость', 'Координация', 'Гибкость'], datasets: [{ label: 'Уровень подготовленности', data: [8, 9, 7, 8, 7], fill: true, backgroundColor: 'rgba(0,86,167,0.2)', borderColor: '#0056A7' }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } }, plugins: { legend: { position: 'top' } } }
+            });
+
+            analyticsChart = new Chart(ctxAn, {
+                type: 'radar',
+                data: { 
+                    labels: ['Сила', 'Выносливость', 'Скорость', 'Координация', 'Гибкость'], 
+                    datasets: [{ 
+                        label: 'Уровень подготовленности', 
+                        data: [8, 9, 7, 8, 7], 
+                        fill: true, 
+                        backgroundColor: 'rgba(0,86,167,0.2)', 
+                        borderColor: '#0056A7',
+                        pointBackgroundColor: '#fff'
+                    }] 
+                },
+                options: { 
+                    responsive: true, 
+                    maintainAspectRatio: false,
+                    scales: { r: { ticks: { beginAtZero: true, max: 10 } } },
+                    plugins: { legend: { position: 'top' } }
+                }
+            });
+        }
+
+        // --- Аналитика (статистика) ---
+        function updateAnalytics() {
+            const diary = JSON.parse(localStorage.getItem('ert_diary')) || [];
+            const exams = JSON.parse(localStorage.getItem('ert_exams')) || [];
+
+            // Средняя ЧСС
+            const hrValues = diary.map(d => Number(d.rhr)).filter(v => v > 0);
+            const avgHR = hrValues.length ? (hrValues.reduce((a,b)=>a+b,0) / hrValues.length).toFixed(1) : 0;
+            document.getElementById('a_avg_hr').innerText = avgHR;
+
+            // Средний вес
+            const wValues = diary.map(d => Number(d.weight)).filter(v => v > 0);
+            const avgW = wValues.length ? (wValues.reduce((a,b)=>a+b,0) / wValues.length).toFixed(1) : 0;
+            document.getElementById('a_weight_avg').innerText = avgW;
+
+            // Тесты и экзамены
+            document.getElementById('a_tests_passed').innerText = '1'; // в этом прототипе тест один
+            document.getElementById('a_exams_passed').innerText = exams.length;
+        }
+
+        // --- История действий ---
+        function logHistory(msg) {
+            const history = JSON.parse(localStorage.getItem('ert_history')) || [];
+            history.push({ time: new Date().toLocaleTimeString('ru-RU'), msg });
+            if (history.length > 50) history.shift(); // храним последние 50 записей
+            localStorage.setItem('ert_history', JSON.stringify(history));
+            renderHistoryList();
+        }
+
+        function renderHistoryList() {
+            const listEl = document.getElementById('historyList');
+            const history = JSON.parse(localStorage.getItem('ert_history')) || [];
+            if (history.length === 0) {
+                listEl.innerHTML = '<p style="color:#777;text-align:center">Истории действий нет</p>';
+                return;
+            }
+            listEl.innerHTML = history.slice().reverse().map(h => `
+                <div style="border-bottom:1px solid #eee;padding:6px 0">
+                    <span style="font-size:11px;color:#999">${h.time}</span> ${h.msg}
+                </div>
+            `).join('');
+        }
+
+        // --- Инициализация при загрузке ---
+        window.addEventListener('DOMContentLoaded', () => {
+            // Переключение вкладок по умолчанию (активна первая)
+            const firstBtn = document.querySelector('nav button');
+            if (firstBtn) firstBtn.click();
+
+            // Загрузка профиля (если есть)
+            const savedProfile = localStorage.getItem('ert_profile');
+            if (savedProfile) {
+                const p = JSON.parse(savedProfile);
+                Object.keys(p).forEach(k => {
+                    const el = document.getElementById('p_' + k);
+                    if (el) el.value = p[k];
+                });
+                calcProfile();
+            }
+
+            // Отрисовка списков
+            renderDiaryList();
+            renderExamList();
+            renderHistoryList();
+
+            // Графики
+            drawCharts();
+            updateAnalytics();
+        });
+    </script>
+</body>
+</html>
+
+
